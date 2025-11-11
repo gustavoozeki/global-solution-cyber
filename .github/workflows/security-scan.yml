@@ -20,17 +20,17 @@ jobs:
       - name: Checar o código (Checkout)
         uses: actions/checkout@v3
 
-      # ETAPA 1 CORRIGIDA: Criar o arquivo de regras PRIMEIRO
+      # ETAPA 1 CORRIGIDA: Criar o arquivo de regras no formato CORRETO
       - name: Criar arquivo de regras
         run: |
-          echo "rules:" > rules.yaml
-          echo "  - id: 10202" >> rules.yaml
-          echo "    action: ignore" >> rules.yaml
+          # O formato correto é: [ID da Regra] [AÇÃO]
+          # Vamos ignorar a regra 10202 (Anti-CSRF Tokens)
+          echo "10202 IGNORE" > rules.yaml
       
-      # ETAPA 2 CORRIGIDA: Rodar o ZAP Scan DEPOIS
+      # ETAPA 2: Rodar o ZAP Scan
       - name: ZAP Scan
         uses: zaproxy/action-baseline@v0.11.0
         with:
           target: 'http://juiceshop:3000'
-          # Agora o ZAP vai encontrar o arquivo 'rules.yaml'
+          # O ZAP vai ler o arquivo 'rules.yaml' agora no formato certo
           cmd_options: '-c rules.yaml'
