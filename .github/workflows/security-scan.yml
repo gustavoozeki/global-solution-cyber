@@ -1,11 +1,8 @@
 name: OWASP ZAP Baseline Scan
 
-# Define quando o pipeline vai rodar
 on:
-  # Roda toda vez que você der 'push' na branch 'main'
   push:
     branches: [ main ]
-  # Permite rodar manualmente pela aba "Actions"
   workflow_dispatch:
 
 jobs:
@@ -13,35 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     name: Scanar a aplicação web com ZAP
 
-    # PASSO 1: Iniciar a aplicação-alvo (Juice Shop) como um serviço
-    # O GitHub vai criar um container para o Juice Shop
     services:
       juiceshop:
         image: bkimminich/juice-shop
         ports:
-          - 3000:3000 # Expõe a porta para o ZAP acessar
+          - 3000:3000
 
     steps:
-      # Etapa 1: Apenas um passo para "ver" o código, embora não seja usado
       - name: Checar o código (Checkout)
         uses: actions/checkout@v3
 
-      # Etapa 2: Rodar o OWASP ZAP Baseline Scan
-      - name: ZAP Scan
-        uses: zaproxy/action-baseline@v0.11.0
-        with:
-          # Informa ao ZAP qual URL escanear
-          # 'juiceshop:3000' é o endereço do serviço que definimos acima
-          target: 'http://juiceshop:3000'
-          
-          # Ignora a regra 10202 (Anti-CSRF Tokens) 
-          # O Juice Shop não tem, e isso gera um alerta desnecessário
-          cmd_options: '-c rules.yaml'
-
-      # Etapa 3: Criar o arquivo de regras para ignorar o Anti-CSRF
-      # (Este passo é opcional mas ajuda a limpar o relatório)
+      # ETAPA 1 CORRIGIDA: Criar o arquivo de regras PRIMEIRO
       - name: Criar arquivo de regras
         run: |
           echo "rules:" > rules.yaml
           echo "  - id: 10202" >> rules.yaml
           echo "    action: ignore" >> rules.yaml
+      
+      # ETAPA 2 CORRIGIDA: Rodar o ZAP Scan DEPOIS
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.11.0
+        with:
+          target: 'http://juiceshop:3000'
+          # Agora o ZAP vai encontrar o arquivo 'rules.yaml'
+          cmd_options: '-c rules.yaml'
