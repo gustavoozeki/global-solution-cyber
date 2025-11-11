@@ -26,10 +26,5 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-baseline@v0.11.0
         with:
-          # ---- ESTA É A CORREÇÃO PRINCIPAL ----
-          # O ZAP (que roda no 'host') acessa o serviço 'juiceshop'
-          # através do 'localhost' do host.
           target: 'http://localhost:3000'
-          
-          # Nós removemos o 'cmd_options' e o 'rules.yaml' 
-          # para evitar todos os erros de permissão e formato.
+
